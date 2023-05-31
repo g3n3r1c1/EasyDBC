@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "kt.dbc"
-version = "1.0-SNAPSHOT"
+version = "Alpha-0.1.0"
 
 repositories {
     mavenCentral()
