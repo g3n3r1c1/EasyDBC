@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 
 // "jdbc:sqlite:./mybase1.db"
 public class Main {
@@ -6,10 +7,11 @@ public class Main {
         return KDBC.DBC(db);
     }
     public static void main(String[] args){
-        ArrayList<Object> hi = new ArrayList<>();
-        hi.add(4);
-        hi.add("bruh");
-        hi.add(17);
-        JDBX("jdbc:sqlite:./mybase1.db").modTable("Ambrabam").deleteRow("binkin", "bruh");
+        String url = "jdbc:sqlite:./mybase1.db";
+
+        JDBX(url).modTable("Ambrabam").addRow(Arrays.asList(86, "h0llo", 198));
+        JDBX(url).modTable("Ambrabam").addRow(Arrays.asList(56, "h0llo", 198));
+        JDBX(url).modTable("Ambrabam").addRow(Arrays.asList(26, "h0llo", 198));
+        //JDBX(url).modTable("Ambrabam").deleteRow("binkin", "bruh");
     }
 }
