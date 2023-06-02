@@ -1,5 +1,7 @@
 import org.sqlite.BusyHandler
 import java.sql.*
+import kotlin.math.sqrt
+import kotlin.reflect.typeOf
 import busiest.busyman as newHandler
 
 /**
@@ -23,13 +25,8 @@ object KDBC{
 
         private val url = db
         private fun Tctrl(sql: String): Unit {
-            var conn = DriverManager.getConnection(url)
-            conn.autoCommit = false
-            conn.beginRequest()
-            conn.createStatement().execute(sql)
-            conn.commit()
-            conn.endRequest()
-            conn.close()
+            DriverManager.getConnection(url).createStatement().execute(sql)
+            DriverManager.getConnection(url).close()
         }
 
         private fun Qctrl(sql: String): ResultSet {
@@ -68,7 +65,7 @@ object KDBC{
                     in arrayOf("STRING", "ALPHA", "CHAR", "TEXT") -> "TEXT"
                     else -> throw Exception("type is not valid.")
                 }
-            Tctrl("CREATE TABLE IF NOT EXISTS ${Name}(${PrimaryKey} ${KeyType.uppercase()} PRIMARY KEY)")
+            Tctrl("CREATE TABLE IF NOT EXISTS ${Name}(${PrimaryKey} ${utype} PRIMARY KEY)")
         }
         /**
          * Drops a table within the database.
@@ -122,7 +119,7 @@ object KDBC{
             /**
              * Drops columns by their name. currently lacks the ability to drop by column_id.
              */
-            fun dropColumn(Col: String) {
+            public fun dropColumn(Col: String): Unit {
                 Tctrl("ALTER TABLE ${Tbl} DROP COLUMN ${Col}")
             }
 
@@ -167,36 +164,74 @@ object KDBC{
                     cols = cols.drop(3)
                     Insertion = Insertion.drop(3)
                     RSet.close()
-                    println("INSERT OR REPLACE INTO ${Tbl} (${cols}) VALUES (${Insertion})")
                     Tctrl("INSERT OR REPLACE INTO ${Tbl} (${cols}) VALUES (${Insertion})")
                     return
                 }
-                var counted = RSet.metaData.columnCount
+                val counted = RSet.metaData.columnCount
                 RSet.close()
                 throw Exception("Error: ${values.size} arguments in addRow. ${Tbl} has ${counted} columns.")
             }
 
             /**
-             * deletes a row where the data within the column name matches the row.
-             * @param[ColName]: this is the column checked for a match by value. it is not case sensitive.
-             * @param[Data]: this is the data checked for a match within the column of choice.
-             * This parameter may only recieve a value of type Int/Long or String. Strings are case sensitive.
+             * Returns a subclass that allows for multiple singular condition delete statements.
+             * Currently multi-conditional deletion is unsupported, this is subject to change.
+             * @param[ColName]: this is the column checked for a condition. it is not case sensitive.
              */
-            public fun deleteRow(ColName: String, Data: Any): Unit{
-                var RSet = Qctrl("SELECT * from ${Tbl}")
-                val final_command: String =
-                when(Data){
-                    is String -> """DELETE FROM ${Tbl} WHERE ${ColName} = '${Data}'"""
-                    is Int -> """DELETE FROM ${Tbl} WHERE ${ColName} = ${Data}"""
-                    is Long -> """DELETE FROM ${Tbl} WHERE ${ColName} = ${Data}"""
-                    else -> throw Exception("Error in deleteRow: invalid type given.")
+            public fun deleteRow(ColName: String): DLR {
+                 return this.DLR(ColName)
+            }
+            public inner class DLR(NameCol: String) {
+                private val ColName = NameCol
+                private fun execute(Condition: String, Data: Any) {
+                    var RSet = Qctrl("SELECT * from ${Tbl}")
+                    for (i in 1..RSet.metaData.columnCount)
+                        if ((Data is String) == (RSet.metaData.getColumnTypeName(i) == "TYPE TEXT") &&
+                            RSet.metaData.getColumnName(i).lowercase() == ColName.lowercase()
+                        ) {
+                            RSet.close()
+                            Tctrl("DELETE FROM ${Tbl} WHERE ${ColName} ${Condition}")
+                            return
+                        }
+                    RSet.close()
+                    throw Exception("Error in deleteRow: invalid parameters.")
                 }
-                for (i in 1 .. RSet.metaData.columnCount)
-                    if ((Data is String) == (RSet.metaData.getColumnTypeName(i) == "TYPE TEXT") &&
-                        RSet.metaData.getColumnName(i).lowercase() == ColName.lowercase()) {
-                        Tctrl(final_command)
+
+                public fun isMatch(Data: Any): Unit {
+                    when (Data) {
+                        is String -> execute("""= '${Data}'""", Data)
+                        is Int -> execute("= ${Data}", Data)
+                        is Long -> execute("= ${Data}", Data)
+                        else -> throw Exception("Error in deleteRow: invalid type given.")
                     }
-                throw Exception("Error in deleteRow: invalid parameters.")
+                    return
+                }
+
+
+                public fun notMatch(Data: Any) {
+                    when (Data) {
+                        is String -> execute("""<> '${Data}'""", Data)
+                        is Int -> execute("<> ${Data}", Data)
+                        is Long -> execute("<> ${Data}", Data)
+                        else -> throw Exception("Error in deleteRow: invalid type given.")
+                    }
+                    return
+                }
+
+                public fun inRange(lower: Int, upper: Int) {
+                    if(lower >= upper){
+                        throw Exception("Error: the lower bound must be less than the upper bound."
+                        +" Consider using match or notInRange instead?")
+                    }
+                    execute("BETWEEN ${lower} AND ${upper}", Pair(lower, upper))
+                }
+
+                public fun notInRange(lower: Int, upper: Int){
+                    if(lower >= upper){
+                        throw Exception("Error: the lower bound must be less than the upper bound."
+                                +" Consider using match or InRange instead?")
+                    }
+                    execute("NOT BETWEEN ${lower} AND ${upper}", Pair(lower, upper))
+                }
             }
         }
     }

@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 // "jdbc:sqlite:./mybase1.db"
 public class Main {
@@ -9,9 +10,9 @@ public class Main {
     public static void main(String[] args){
         String url = "jdbc:sqlite:./mybase1.db";
 
-        JDBX(url).modTable("Ambrabam").addRow(Arrays.asList(86, "h0llo", 198));
-        JDBX(url).modTable("Ambrabam").addRow(Arrays.asList(56, "h0llo", 198));
-        JDBX(url).modTable("Ambrabam").addRow(Arrays.asList(26, "h0llo", 198));
-        //JDBX(url).modTable("Ambrabam").deleteRow("binkin", "bruh");
+        for (int i = 1; i < 15; i++) {
+            JDBX(url).modTable("Ambrabam").addRow(List.of(i, "hello", (i*i)));
+        }
+        JDBX(url).modTable("Ambrabam").deleteRow("konzi").notInRange(600, 1200);
     }
 }
