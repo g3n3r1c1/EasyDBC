@@ -17,8 +17,8 @@ INSERT INTO <table> (col1, col2... coln) VALUES (val1, val2... valn);
 ```
 
 which becomes
-```kotlin
-fun databaseoperation(){
+```java
+public void databaseoperation(){
         KDBC.DBC("url").modTable("table").addRow(listOf(val1,val2,valn))
         }
 ```
