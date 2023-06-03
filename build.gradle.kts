@@ -5,7 +5,7 @@ plugins {
     application
 }
 
-group = "kt.dbc"
+group = "easydbc"
 version = "Alpha-0.1.0"
 
 repositories {
