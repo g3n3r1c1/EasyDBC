@@ -30,7 +30,7 @@ The goal is to never produce an SQL error of any kind, instead the library shoul
 * **Ensure that other SQL drivers are fully compatible with this library,** such as Postgres and MySQL. Preferably this would be done without creating specific subclasses for any driver.
 * **Expand the list of methods to support more distinct SQL commands.** the library is currently extremely small, only supporting some of the most basic SQL commands. 
 * **Create an unsafe version of the class?** This would mainly exist to provide speed gains for those who may need it, but if you really need that, you should maybe consider writing your own SQL code.
-* **Possibly provide a manual for use in Clojure, as well as better integration** This library would ideally usable from any JVM language, but Clojure seems to cause some trouble. Java/Scala/Kotlin work just fine however.
+* **Possibly provide a manual for use in Clojure, as well as better integration.** This library would ideally usable from any JVM language, but Clojure seems to cause some trouble. Java/Scala/Kotlin work just fine however.
 
 
 # Closing note
