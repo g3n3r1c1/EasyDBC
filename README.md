@@ -17,8 +17,10 @@ INSERT INTO <table> (col1, col2... coln) VALUES (val1, val2... valn);
 ```
 
 which becomes
-```java
-KDBC.DBC("<url>").modTable(<table>).addRow(List.of(val1, val2.... valn));
+```kotlin
+fun databaseoperation(){
+        KDBC.DBC("url").modTable("table").addRow(listOf(val1,val2,valn))
+        }
 ```
 
 The goal is to never produce an SQL error of any kind, instead the library should throw concise and meaningful exceptions to you, without actually performing the command.
