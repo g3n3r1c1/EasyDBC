@@ -1,8 +1,6 @@
-import org.sqlite.BusyHandler
 import java.sql.*
-import kotlin.math.sqrt
-import kotlin.reflect.typeOf
-import busiest.busyman as newHandler
+
+//SELECT tbl_name FROM sqlite_master WHERE type='table'
 
 /**
  * A small package that provides a host of wrapper functions for common SQL queries and commands.
@@ -207,7 +205,7 @@ object KDBC{
                 }
 
 
-                public fun notMatch(Data: Any) {
+                public fun notMatch(Data: Any): Unit {
                     when (Data) {
                         is String -> execute("""<> '${Data}'""", Data)
                         is Int -> execute("<> ${Data}", Data)
@@ -217,7 +215,7 @@ object KDBC{
                     return
                 }
 
-                public fun inRange(lower: Int, upper: Int) {
+                public fun inRange(lower: Int, upper: Int): Unit{
                     if(lower >= upper){
                         throw Exception("Error: the lower bound must be less than the upper bound."
                         +" Consider using match or notInRange instead?")
@@ -225,13 +223,14 @@ object KDBC{
                     execute("BETWEEN ${lower} AND ${upper}", Pair(lower, upper))
                 }
 
-                public fun notInRange(lower: Int, upper: Int){
+                public fun notInRange(lower: Int, upper: Int):Unit{
                     if(lower >= upper){
                         throw Exception("Error: the lower bound must be less than the upper bound."
                                 +" Consider using match or InRange instead?")
                     }
                     execute("NOT BETWEEN ${lower} AND ${upper}", Pair(lower, upper))
                 }
+
             }
         }
     }

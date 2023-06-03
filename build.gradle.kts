@@ -13,6 +13,7 @@ repositories {
 }
 
 dependencies {
+    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.8.21")
     testImplementation("org.jetbrains.kotlin:kotlin-test:1.8.20-RC")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.20-RC")
     implementation("org.xerial:sqlite-jdbc:3.40.1.0")
@@ -21,6 +22,7 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
 
 kotlin {
     jvmToolchain(11)
