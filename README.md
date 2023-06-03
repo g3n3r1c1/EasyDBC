@@ -4,7 +4,7 @@ A simple library to wrap common SQL commands and queries in Java/Kotlin syntax. 
 
 The primary goal of this project is to make writing SQL in Java applications unintrusive, for people who may prefer to not write SQL generally. The other goal is make controlling your database simple and intuitive, where it may not be such in SQL.
 
-It is currently extremely unfinished, but the first alpha versions should be accessible for you.
+It's currently extremely unfinished, but the first alpha versions should be accessible for you.
 
 It's only been tested with SQLite as of now.
 
