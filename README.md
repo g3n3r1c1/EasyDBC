@@ -34,4 +34,4 @@ The goal is to never produce an SQL error of any kind, instead the library shoul
 
 
 # Closing note
-It should be made clear that this is not a full substitute for SQL. At the very least not now. It can make commands simpler for you if you're writing some simple code to operate on a small/average database, but for more advanced databases, there are far better options than this.
+It should be made clear that this is not a full substitute for SQL. At the very least not now. It can make commands easy for you if you're writing some simple code to operate on a small/average database, but for more advanced databases, there are far better options than this.
