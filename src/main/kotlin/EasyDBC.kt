@@ -45,8 +45,7 @@ object EasyDBC{
             val tables = ArrayList<String>()
             val rSet = qCtrl("SELECT tbl_name FROM sqlite_master WHERE type='table'")
             while(rSet.next())
-                tables.add(rSet.getString(rSet.row))
-            rSet.close()
+                tables.add(rSet.getString(1))
             return tables
         }
 
@@ -175,10 +174,10 @@ object EasyDBC{
              * @param[column]: this is the column checked for a condition. it is not case-sensitive.
              * If you pass this parameter with any space characters, they will be internally handled as underscores.
              */
-            fun deleteRow(column: String): DLR {
-                 return this.DLR(column)
+            fun deleteRow(column: String): DeleteRow {
+                 return this.DeleteRow(column)
             }
-            inner class DLR(nameCol: String) {
+            inner class DeleteRow(nameCol: String) {
                 private val colName = nameCol.replace(' ', '_')
 
                 private fun execute(condition: String, data: Any) {
