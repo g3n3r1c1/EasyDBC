@@ -16,7 +16,7 @@ object EasyDBC{
     fun easyDBC(db: String): EasyDBC = EasyDBC(db)
 
     /**
-     * class coupled with the method "dbCon" from the object EasyDBC
+     * class coupled with the method "easyDBC" from the object EasyDBC
      * @see[easyDBC]
      */
      open class EasyDBC(db: String) {
@@ -45,13 +45,14 @@ object EasyDBC{
             val rSet = qCtrl("SELECT tbl_name FROM sqlite_master WHERE type='table'")
             while(rSet.next())
                 tables.add(rSet.getString(1))
+            rSet.close()
             return tables
         }
 
 
         /**
          * Creates a new table within the database if a table by the name does not exist.
-         * The primary is an incremental integer labelled "id" by default
+         * The primary key is an incremental integer labelled "id" by default
          * @param[name]: specifies the name of the table.
          */
         fun createTable(name: String){
@@ -74,8 +75,7 @@ object EasyDBC{
          * @param[keyType]:specifies a key type. may be either integer or text.
          * */
         fun createTable(name: String, primaryKey: String, keyType: String){
-            val inferred: String = inferredType(keyType)
-            tCtrl("CREATE TABLE IF NOT EXISTS ${name.replace(' ','_')}($primaryKey $inferred PRIMARY KEY)")
+            tCtrl("CREATE TABLE IF NOT EXISTS ${name.replace(' ','_')}($primaryKey ${inferredType(keyType)} PRIMARY KEY)")
         }
         /**
          * Drops a table within the database.
@@ -89,7 +89,7 @@ object EasyDBC{
          * A subclass specifically designated for operations such as adding and removing rows and columns.
          * Here it's coupled with an instantiation method.
          * @param[table]: Here we specify which of the tables in our database we would like to operate on.
-         * @return: this.ModTable(Table)
+         * @return: an instance of the ModTable subclass for the table given.
          */
         fun modTable(table: String): ModTable{
             if(table.replace(' ','_') in tableList())
