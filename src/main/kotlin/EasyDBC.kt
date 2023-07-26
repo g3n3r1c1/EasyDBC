@@ -89,7 +89,7 @@ object EasyDBC{
          * A subclass specifically designated for operations such as adding and removing rows and columns.
          * Here it's coupled with an instantiation method.
          * @param[table]: Here we specify which of the tables in our database we would like to operate on.
-         * @return: an instance of the ModTable subclass for the table given.
+         * @return: An instance of the ModTable subclass for the table given.
          */
         fun modTable(table: String): ModTable{
             if(table.replace(' ','_') in tableList())
@@ -98,7 +98,7 @@ object EasyDBC{
         }
 
         /**
-         * Subclass coupled with the "tableMod" instantiation method.
+         * Subclass coupled with the "modTable" instantiation method.
          * @see[modTable]
          */
 
@@ -143,7 +143,7 @@ object EasyDBC{
              * Adds a row to the table defined within the subclass.
              * the columns are inferred automatically so that you only need to type out the data you
              * normally would in SQL.
-             * it currently lacks the ability to skip distinct columns.
+             * it currently lacks the ability to skip distinct columns. you have to provide a value for all columns.
              * @param[values]: is passed as a List. the order of the entries in the list must match the order
              * of columns in your table.
              * */
@@ -182,21 +182,20 @@ object EasyDBC{
                 private fun execute(condition: String, data: Any) {
                     val rSet = qCtrl("SELECT * from $tbl")
                     for (i in 1..rSet.metaData.columnCount)
-                        if ((data is String) == (rSet.metaData.getColumnTypeName(i) == "TYPE TEXT") &&
+                        if ((data is String) == ((rSet.metaData.getColumnTypeName(i) == "TYPE TEXT")) &&
                             rSet.metaData.getColumnName(i).lowercase() == colName.lowercase()){
                             rSet.close()
                             tCtrl("DELETE FROM $tbl WHERE $colName $condition")
                             return
                         }
                     rSet.close()
-                    throw Exception("Error in deleteRow: invalid parameters.")
+                    throw Exception("Error deleting row: invalid parameters.")
                 }
 
                 fun isMatch(value: Any){
                     when (value) {
                         is String -> execute("""= '$value'""", value)
-                        is Int -> execute("= $value", value)
-                        is Long -> execute("= $value", value)
+                        is Int, is Long -> execute("= $value", value)
                         else -> throw Exception("Error in deleteRow: invalid type given.")
                     }
                     return
@@ -206,8 +205,7 @@ object EasyDBC{
                 fun notMatch(value: Any){
                     when (value) {
                         is String -> execute("""<> '$value'""", value)
-                        is Int -> execute("<> $value", value)
-                        is Long -> execute("<> $value", value)
+                        is Int, is Long -> execute("<> $value", value)
                         else -> throw Exception("Error in deleteRow: invalid type given.")
                     }
                     return
