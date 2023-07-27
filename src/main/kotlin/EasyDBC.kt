@@ -49,6 +49,10 @@ object EasyDBC{
             return tables
         }
 
+        /**
+         * private function just meant to add underscore safety for snake-case using folk.
+         */
+        private fun STU(spaced: String): String = spaced.replace(' ', '_')
 
         /**
          * Creates a new table within the database if a table by the name does not exist.
@@ -56,7 +60,7 @@ object EasyDBC{
          * @param[name]: specifies the name of the table.
          */
         fun createTable(name: String){
-            tCtrl("CREATE TABLE IF NOT EXISTS ${name.replace(' ','_')}(id INTEGER INCREMENT PRIMARY KEY)")
+            tCtrl("CREATE TABLE IF NOT EXISTS ${STU(name)}(id INTEGER INCREMENT PRIMARY KEY)")
         }
         /**
          * Creates a new table within the database if a table by the name does not exist.
@@ -65,7 +69,7 @@ object EasyDBC{
          * @param[primaryKey]: specifies the primary key name.
          * */
         fun createTable(name: String, primaryKey: String){
-            tCtrl("CREATE TABLE IF NOT EXISTS ${name.replace(' ','_')}($primaryKey INTEGER INCREMENT PRIMARY KEY)")
+            tCtrl("CREATE TABLE IF NOT EXISTS ${STU(name)}($primaryKey INTEGER INCREMENT PRIMARY KEY)")
         }
 
         /**
@@ -75,15 +79,16 @@ object EasyDBC{
          * @param[keyType]:specifies a key type. may be either integer or text.
          * */
         fun createTable(name: String, primaryKey: String, keyType: String){
-            tCtrl("CREATE TABLE IF NOT EXISTS ${name.replace(' ','_')}($primaryKey ${inferredType(keyType)} PRIMARY KEY)")
+            tCtrl("CREATE TABLE IF NOT EXISTS ${STU(name)}($primaryKey ${inferredType(keyType)} PRIMARY KEY)")
         }
         /**
          * Drops a table within the database.
          * @param[name]: specifies the name of the table.
          */
         fun dropTable(name: String){
-            tCtrl("DROP TABLE IF EXISTS ${name.replace(' ','_')}")
+            tCtrl("DROP TABLE IF EXISTS ${STU(name)}")
         }
+
 
         /**
          * A subclass specifically designated for operations such as adding and removing rows and columns.
@@ -92,7 +97,7 @@ object EasyDBC{
          * @return: An instance of the ModTable subclass for the table given.
          */
         fun modTable(table: String): ModTable{
-            if(table.replace(' ','_') in tableList())
+            if(STU(table) in tableList())
                 return this.ModTable(table)
             throw Exception("Error: The table $table may not exist.")
         }
@@ -104,7 +109,17 @@ object EasyDBC{
 
         inner class ModTable(table: String) {
 
-            private val tbl = table
+            private val tbl_ = table
+            private val tbl = STU(tbl_)
+
+            private fun columnList(): ArrayList<String>{
+                val cols = ArrayList<String>()
+                val rSet = qCtrl("SELECT NAME FROM (pragma_table_info(\"$tbl\"))")
+                while(rSet.next())
+                    cols.add(rSet.getString(1))
+                rSet.close()
+                return cols
+            }
 
             private fun typeCheck(param: Any, dbcol: Int){
                 val rSet = qCtrl("SELECT * from $tbl")
@@ -125,7 +140,8 @@ object EasyDBC{
              * Drops columns by their name. currently lacks the ability to drop by column_id.
              */
             fun dropColumn(column: String){
-                tCtrl("ALTER TABLE $tbl DROP COLUMN $column")
+                if(STU(column) in columnList())
+                    tCtrl("ALTER TABLE $tbl DROP COLUMN ${STU(column)}")
             }
 
             /**
@@ -136,9 +152,20 @@ object EasyDBC{
              * @param[type]: Selects type from either INTEGER or TEXT.
              */
             fun addColumn(name: String, type: String) {
-                    tCtrl("ALTER TABLE $tbl ADD COLUMN $name type ${inferredType(type)}")
+                if(STU(name) !in columnList())
+                    tCtrl("ALTER TABLE $tbl ADD COLUMN ${STU(name)} type ${inferredType(type)}")
             }
 
+            /**
+             * sets a column as a foreign key. Currently only selects the first column
+             * set as primary key for its reference. The referenced column is selected automatically.
+             */
+            fun foreignKey(keyCol: String, refTable: String){//TODO: allow better key selection. also add an exception.
+                val rSet = qCtrl("SELECT NAME FROM (pragma_table_info(\"${STU(refTable)}\")) WHERE pk=1")
+                val pkey: String = rSet.getString(1)
+                rSet.close()
+                tCtrl("ALTER TABLE $tbl ADD FOREIGN KEY ${STU(keyCol)} REFERENCES ${STU(refTable)}($pkey)")
+            }
             /**
              * Adds a row to the table defined within the subclass.
              * the columns are inferred automatically so that you only need to type out the data you
@@ -164,7 +191,7 @@ object EasyDBC{
                 }
                 val counted = rSet.metaData.columnCount
                 rSet.close()
-                throw Exception("Error: ${values.size} arguments in addRow. $tbl has $counted columns.")
+                throw Exception("Error: ${values.size} arguments in addRow. $tbl_ has $counted columns.")
             }
 
             /**
@@ -174,10 +201,15 @@ object EasyDBC{
              * If you pass this parameter with any space characters, they will be internally handled as underscores.
              */
             fun deleteRow(column: String): DeleteRow {
-                 return this.DeleteRow(column)
+                if(STU(column) in columnList())
+                    return this.DeleteRow(column)
+                else
+                    throw Exception("The column $column may not exist in $tbl_")
             }
             inner class DeleteRow(nameCol: String) {
-                private val colName = nameCol.replace(' ', '_')
+
+                private val col_Name = nameCol
+                private val colName = STU(col_Name)
 
                 private fun execute(condition: String, data: Any) {
                     val rSet = qCtrl("SELECT * from $tbl")

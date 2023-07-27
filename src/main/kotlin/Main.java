@@ -19,6 +19,5 @@ public class Main {
         example(url).dropTable("OtherTable");
         example(url).createTable("OtherTable","testkey", "int");
         example(url).modTable("OtherTable").addColumn("othertest", "str");
-        examplefunction();
     }
 }

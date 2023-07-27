@@ -25,12 +25,15 @@ public void databaseoperation(){
 
 The goal is to never produce an SQL error of any kind, instead the library should throw concise and meaningful exceptions to you, without actually performing the command.
 
+The main drawback is that since the SQL commands wrapped within this library are very simple, it has a step-wise approach to commands which means two things: commands that were possibly singular in SQL may need to be broken down into multiple lines of code, and that modifying a table's columns after data has already been inserted, while possible, is severely discouraged with key columns in particular.
+
 
 # Roadmap
 * **Ensure that other SQL drivers are fully compatible with this library,** such as Postgres and MySQL. Preferably this would be done without creating specific subclasses for any driver.
 * **Expand the list of methods to support more distinct SQL commands.** the library is currently extremely small, only supporting some of the most basic SQL commands. 
 * **Create an unsafe version of the class?** This would mainly exist to provide speed gains for those who may need it, but if you really need that, you should maybe consider writing your own SQL code.
 * **Possibly provide a manual for use in Clojure, as well as better integration.** This library would ideally be usable from any JVM language, but Clojure seems to cause some trouble. Java/Scala/Kotlin work just fine however.
+* **Allow Multiple-field key sets** currently this library **can** set multiple columns as keyss, but it's super flimsy and not at all implemented properly and safely.
 
 
 # Closing note
